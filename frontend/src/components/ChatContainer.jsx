@@ -21,8 +21,6 @@ function ChatContainer() {
   useEffect(() => {
     getMessagesByUserId(selectedUser._id);
     subscribeToMessages();
-
-    // clean up
     return () => unsubscribeFromMessages();
   }, [selectedUser, getMessagesByUserId, subscribeToMessages, unsubscribeFromMessages]);
 
@@ -36,7 +34,13 @@ function ChatContainer() {
     <>
       <ChatHeader />
       <div className="flex-1 px-6 overflow-y-auto py-8">
-        {messages.length > 0 && !isMessagesLoading ? (
+        {isMessagesLoading ? (
+          <MessagesLoadingSkeleton />
+        ) : !selectedUser.isConnected ? (
+          <div className="not-connected-banner">
+            Waiting for {selectedUser.fullName} to accept your chat request.
+          </div>
+        ) : messages.length > 0 ? (
           <div className="max-w-3xl mx-auto space-y-6">
             {messages.map((msg) => (
               <div
@@ -63,17 +67,14 @@ function ChatContainer() {
                 </div>
               </div>
             ))}
-            {/* 👇 scroll target */}
             <div ref={messageEndRef} />
           </div>
-        ) : isMessagesLoading ? (
-          <MessagesLoadingSkeleton />
         ) : (
-          <NoChatHistoryPlaceholder name={selectedUser.fullName} />
+          <NoChatHistoryPlaceholder />
         )}
       </div>
 
-      <MessageInput />
+      {selectedUser.isConnected && <MessageInput />}
     </>
   );
 }

@@ -18,27 +18,51 @@ const io = new Server(server, {
 io.use(socketAuthMiddleware);
 
 // we will use this function to check if the user is online or not
+const userSocketMap = {}; // {userId: socketId}
+
 export function getReceiverSocketId(userId) {
   return userSocketMap[userId];
 }
 
-// this is for storig online users
-const userSocketMap = {}; // {userId:socketId}
-
 io.on("connection", (socket) => {
-  console.log("A user connected", socket.user.fullName);
-
-  const userId = socket.userId;
+  const userId = socket.user._id.toString(); // use what the auth middleware already gave us
   userSocketMap[userId] = socket.id;
 
-  // io.emit() is used to send events to all connected clients
+  console.log("Socket authenticated for user:", socket.user.fullName, `(${userId})`);
+
   io.emit("getOnlineUsers", Object.keys(userSocketMap));
 
-  // with socket.on we listen for events from clients
   socket.on("disconnect", () => {
     console.log("A user disconnected", socket.user.fullName);
     delete userSocketMap[userId];
     io.emit("getOnlineUsers", Object.keys(userSocketMap));
+  });
+
+  // --- WebRTC signaling relay ---
+
+  socket.on("webrtc-offer", ({ targetUserId, offer }) => {
+    console.log("Relaying offer from", userId, "to", targetUserId);
+    const targetSocketId = getReceiverSocketId(targetUserId);
+    if (targetSocketId) {
+      io.to(targetSocketId).emit("webrtc-offer", { fromUserId: userId, offer });
+    } else {
+      console.log("No socket found for target user:", targetUserId);
+    }
+  });
+
+  socket.on("webrtc-answer", ({ targetUserId, answer }) => {
+    console.log("Relaying answer from", userId, "to", targetUserId);
+    const targetSocketId = getReceiverSocketId(targetUserId);
+    if (targetSocketId) {
+      io.to(targetSocketId).emit("webrtc-answer", { fromUserId: userId, answer });
+    }
+  });
+
+  socket.on("webrtc-ice-candidate", ({ targetUserId, candidate }) => {
+    const targetSocketId = getReceiverSocketId(targetUserId);
+    if (targetSocketId) {
+      io.to(targetSocketId).emit("webrtc-ice-candidate", { fromUserId: userId, candidate });
+    }
   });
 });
 

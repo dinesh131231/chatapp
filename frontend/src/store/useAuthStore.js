@@ -3,6 +3,7 @@ import { axiosInstance } from "../lib/axios";
 import toast from "react-hot-toast";
 import { io } from "socket.io-client";
 import { useChatRequestStore } from "./useChatRequestStore";
+import { useP2PStore } from "./useP2PStore";
 
 const BASE_URL = import.meta.env.MODE === "development" ? "http://localhost:3000" : "/";
 
@@ -97,10 +98,12 @@ export const useAuthStore = create((set, get) => ({
     });
 
     useChatRequestStore.getState().subscribeToChatRequests();
+    useP2PStore.getState().subscribeToP2P();
   },
 
   disconnectSocket: () => {
     if (get().socket?.connected) get().socket.disconnect();
     useChatRequestStore.getState().unsubscribeFromChatRequests();
+    useP2PStore.getState().unsubscribeFromP2P();
   },
 }));

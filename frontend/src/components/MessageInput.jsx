@@ -1,10 +1,11 @@
+
 import { useRef, useState } from "react";
 import useKeyboardSound from "../hooks/useKeyboardSound";
 import { useChatStore } from "../store/useChatStore";
 import toast from "react-hot-toast";
 import { ImageIcon, SendIcon, XIcon } from "lucide-react";
 
-function MessageInput() {
+function MessageInput({ useP2P = false, sendP2PMessage }) {
   const { playRandomKeyStrokeSound } = useKeyboardSound();
   const [text, setText] = useState("");
   const [imagePreview, setImagePreview] = useState(null);
@@ -18,10 +19,25 @@ function MessageInput() {
     if (!text.trim() && !imagePreview) return;
     if (isSoundEnabled) playRandomKeyStrokeSound();
 
-    sendMessage({
-      text: text.trim(),
-      image: imagePreview,
-    });
+    if (useP2P) {
+      // P2P data channel can't carry images in this implementation — text only
+      if (imagePreview) {
+        toast.error("Images aren't supported in offline mode yet");
+        return;
+      }
+
+      const sent = sendP2PMessage?.(text.trim());
+      if (!sent) {
+        toast.error("Direct connection isn't ready yet");
+        return;
+      }
+    } else {
+      sendMessage({
+        text: text.trim(),
+        image: imagePreview,
+      });
+    }
+
     setText("");
     setImagePreview("");
     if (fileInputRef.current) fileInputRef.current.value = "";
@@ -46,6 +62,12 @@ function MessageInput() {
 
   return (
     <div className="p-4 border-t border-slate-700/50">
+      {useP2P && (
+        <div className="max-w-3xl mx-auto mb-2">
+          <span className="text-xs text-emerald-400">📡 Sending directly — offline mode</span>
+        </div>
+      )}
+
       {imagePreview && (
         <div className="max-w-3xl mx-auto mb-3 flex items-center">
           <div className="relative">
@@ -74,7 +96,7 @@ function MessageInput() {
             isSoundEnabled && playRandomKeyStrokeSound();
           }}
           className="flex-1 bg-slate-800/50 border border-slate-700/50 rounded-lg py-2 px-4"
-          placeholder="Type your message..."
+          placeholder={useP2P ? "Type your message (offline mode)..." : "Type your message..."}
         />
 
         <input
@@ -83,14 +105,17 @@ function MessageInput() {
           ref={fileInputRef}
           onChange={handleImageChange}
           className="hidden"
+          disabled={useP2P}
         />
 
         <button
           type="button"
           onClick={() => fileInputRef.current?.click()}
-          className={`bg-slate-800/50 text-slate-400 hover:text-slate-200 rounded-lg px-4 transition-colors ${
+          disabled={useP2P}
+          className={`bg-slate-800/50 text-slate-400 hover:text-slate-200 rounded-lg px-4 transition-colors disabled:opacity-40 disabled:cursor-not-allowed ${
             imagePreview ? "text-cyan-500" : ""
           }`}
+          title={useP2P ? "Images aren't available in offline mode" : ""}
         >
           <ImageIcon className="w-5 h-5" />
         </button>

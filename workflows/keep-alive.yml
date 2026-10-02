@@ -1,0 +1,13 @@
+name: Keep Render Server Alive
+
+on:
+  schedule:
+    - cron: "*/10 * * * *" # every 10 minutes
+  workflow_dispatch: # adds a "Run workflow" button for manual testing
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping server
+        run: curl -sf https://chatapp-wa69.onrender.com/api/running

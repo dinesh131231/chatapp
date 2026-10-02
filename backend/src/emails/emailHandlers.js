@@ -1,8 +1,8 @@
-import { resendClient, sender } from "../lib/resend.js";
+import { resendClient, sender, isResendConfigured } from "../lib/resend.js";
 import { createWelcomeEmailTemplate } from "../emails/emailTemplates.js";
-
+ 
 export const sendWelcomeEmail = async (email, name, clientURL) => {
-  if (process.env.DISABLE_EMAILS === "true") {
+  if (process.env.DISABLE_EMAILS === "true" || !isResendConfigured) {
     console.log("Email sending disabled — skipping welcome email");
     return;
   }
@@ -13,12 +13,12 @@ export const sendWelcomeEmail = async (email, name, clientURL) => {
       subject: "Welcome to Chatify!",
       html: createWelcomeEmailTemplate(name, clientURL),
     });
-
+ 
     if (error) {
       console.error("Error sending welcome email:", error);
       return; // don't throw — a failed email shouldn't break signup
     }
-
+ 
     console.log("Welcome Email sent successfully", data);
   } catch (err) {
     // catches network-level failures too (ECONNRESET, timeouts, etc.)

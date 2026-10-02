@@ -1,4 +1,3 @@
-// store/useP2PStore.js
 import { create } from "zustand";
 import { useAuthStore } from "./useAuthStore";
 import { createP2PConnection } from "../lib/webrtcConnection";
@@ -13,10 +12,19 @@ export const useP2PStore = create((set, get) => ({
         const socket = useAuthStore.getState().socket;
         if (!socket) return;
 
+        let iceServers = [{ urls: "stun:stun.l.google.com:19302" }];
+        try {
+            const { data } = await axiosInstance.get("/turn-credentials");
+            iceServers = data.iceServers;
+        } catch (error) {
+            console.log("Could not fetch TURN credentials, using STUN-only:", error.message);
+        }
+
         const connection = createP2PConnection({
             socket,
             peerUserId,
             isInitiator: true,
+            iceServers,
             onMessage: (msg) => set({ p2pMessages: [...get().p2pMessages, { ...msg, fromPeer: true }] }),
             onStateChange: (status) => set({ p2pStatus: status }),
         });
@@ -68,6 +76,12 @@ export const useP2PStore = create((set, get) => ({
         socket.on("webrtc-ice-candidate", ({ fromUserId, candidate }) => {
             get().connection?.handleIceCandidate(candidate);
         });
+
+        // NEW: peer disabled their offline mode / left — tear our side down too
+        socket.on("webrtc-close", () => {
+            get().connection?.closeLocally();
+            set({ connection: null, p2pEnabled: false, p2pStatus: "disconnected" });
+        });
     },
 
     unsubscribeFromP2P: () => {
@@ -76,5 +90,7 @@ export const useP2PStore = create((set, get) => ({
         socket.off("webrtc-offer");
         socket.off("webrtc-answer");
         socket.off("webrtc-ice-candidate");
+        socket.off("webrtc-close"); // NEW
     },
+
 }));

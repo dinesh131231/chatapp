@@ -2,6 +2,7 @@ import { useState, useRef } from "react";
 import { LogOutIcon, VolumeOffIcon, Volume2Icon } from "lucide-react";
 import { useAuthStore } from "../store/useAuthStore";
 import { useChatStore } from "../store/useChatStore";
+import ConfirmationModal from "./Confirmationmodal";
 
 const mouseClickSound = new Audio("/sounds/mouse-click.mp3");
 
@@ -9,8 +10,14 @@ function ProfileHeader() {
   const { logout, authUser, updateProfile } = useAuthStore();
   const { isSoundEnabled, toggleSound } = useChatStore();
   const [selectedImg, setSelectedImg] = useState(null);
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
 
   const fileInputRef = useRef(null);
+
+  const handleLogout = () => {
+    logout();
+    setShowLogoutConfirm(false);
+  };
 
   const handleImageUpload = (e) => {
     const file = e.target.files[0];
@@ -70,7 +77,7 @@ function ProfileHeader() {
           {/* LOGOUT BTN */}
           <button
             className="text-slate-400 hover:text-slate-200 transition-colors"
-            onClick={logout}
+            onClick={() => setShowLogoutConfirm(true)}
           >
             <LogOutIcon className="size-5" />
           </button>
@@ -93,6 +100,15 @@ function ProfileHeader() {
           </button>
         </div>
       </div>
+      <ConfirmationModal
+        isOpen={showLogoutConfirm}
+        title="Log out?"
+        message="You'll need to sign back in to access your chats."
+        confirmText="Log out"
+        isDangerous
+        onConfirm={handleLogout}
+        onCancel={() => setShowLogoutConfirm(false)}
+      />
     </div>
   );
 }

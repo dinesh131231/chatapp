@@ -14,4 +14,7 @@ export const ENV = {
   CLOUDINARY_API_SECRET: process.env.CLOUDINARY_API_SECRET,
   ARCJET_KEY: process.env.ARCJET_KEY,
   ARCJET_ENV: process.env.ARCJET_ENV,
+  DISABLE_TURN: process.env.DISABLE_TURN === "true",
+  METERED_APP_NAME: process.env.METERED_APP_NAME,
+  METERED_API_KEY: process.env.METERED_API_KEY,
 };

@@ -56,9 +56,17 @@ export const useChatStore = create((set, get) => ({
     }
   },
 
+  // useChatStore.js
   sendMessage: async (messageData) => {
     const { selectedUser, messages } = get();
     const { authUser } = useAuthStore.getState();
+
+    // fast path: browser already knows the network adapter is down —
+    // don't even bother making the request
+    if (!navigator.onLine) {
+      toast.error("You're offline — offline mode is disabled. Enable it to keep chatting.");
+      return;
+    }
 
     const tempId = `temp-${Date.now()}`;
 
@@ -69,19 +77,24 @@ export const useChatStore = create((set, get) => ({
       text: messageData.text,
       image: messageData.image,
       createdAt: new Date().toISOString(),
-      isOptimistic: true, // flag to identify optimistic messages (optional)
+      isOptimistic: true,
     };
-    // immidetaly update the ui by adding the message
     set({ messages: [...messages, optimisticMessage] });
 
     try {
       const res = await axiosInstance.post(`/messages/send/${selectedUser._id}`, messageData);
       set({ messages: messages.concat(res.data) });
     } catch (error) {
-      // remove optimistic message on failure
       set({ messages: messages });
-      toast.error(error.response?.data?.message || "Something went wrong");
+
+      const isNetworkError = !error.response; // request never reached the server
+      if (isNetworkError) {
+        toast.error("You're offline — offline mode is disabled. Enable it to keep chatting.");
+      } else {
+        toast.error(error.response?.data?.message || "Something went wrong");
+      }
     }
+
   },
 
   subscribeToMessages: () => {

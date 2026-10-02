@@ -1,10 +1,10 @@
-// lib/webrtcConnection.js
 export function createP2PConnection({ socket, peerUserId, isInitiator, onMessage, onStateChange }) {
   const pc = new RTCPeerConnection({
     iceServers: [{ urls: "stun:stun.l.google.com:19302" }],
   });
 
   let dataChannel;
+  let isClosed = false;
 
   const setupDataChannel = (channel) => {
     dataChannel = channel;
@@ -20,7 +20,7 @@ export function createP2PConnection({ socket, peerUserId, isInitiator, onMessage
   };
 
   pc.onconnectionstatechange = () => {
-    onStateChange(pc.connectionState); // "connecting" | "connected" | "disconnected" | "failed"
+    onStateChange(pc.connectionState);
   };
 
   if (isInitiator) {
@@ -29,6 +29,15 @@ export function createP2PConnection({ socket, peerUserId, isInitiator, onMessage
   } else {
     pc.ondatachannel = (event) => setupDataChannel(event.channel);
   }
+
+  // tears down THIS side only — used both when we close and when the peer tells us they closed
+  const closeLocally = () => {
+    if (isClosed) return;
+    isClosed = true;
+    dataChannel?.close();
+    pc.close();
+    onStateChange("disconnected"); // don't rely on the browser firing this on manual close
+  };
 
   return {
     pc,
@@ -50,15 +59,15 @@ export function createP2PConnection({ socket, peerUserId, isInitiator, onMessage
       await pc.addIceCandidate(candidate);
     },
     send(text) {
-      if (dataChannel?.readyState === "open") {
-        dataChannel.send(JSON.stringify({ text, createdAt: new Date().toISOString() }));
-        return true;
-      }
-      return false;
+      if (isClosed || dataChannel?.readyState !== "open") return false;
+      dataChannel.send(JSON.stringify({ text, createdAt: new Date().toISOString() }));
+      return true;
     },
     close() {
-      dataChannel?.close();
-      pc.close();
+      // tell the peer we're leaving, THEN close our own side
+      socket.emit("webrtc-close", { targetUserId: peerUserId });
+      closeLocally();
     },
+    closeLocally, // exposed so the store can use it when the PEER initiated the close
   };
 }

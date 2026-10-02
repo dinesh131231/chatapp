@@ -64,6 +64,13 @@ io.on("connection", (socket) => {
       io.to(targetSocketId).emit("webrtc-ice-candidate", { fromUserId: userId, candidate });
     }
   });
+
+  socket.on("webrtc-close", ({ targetUserId }) => {
+  const targetSocketId = getReceiverSocketId(targetUserId);
+  if (targetSocketId) {
+    io.to(targetSocketId).emit("webrtc-close", { fromUserId: userId });
+  }
+});
 });
 
 export { io, app, server };

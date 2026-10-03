@@ -18,17 +18,21 @@ function ChatPage() {
   const [showRequests, setShowRequests] = useState(false);
 
   return (
-    <div className="relative w-full max-w-6xl h-[800px]">
+    <div className="fixed inset-0 md:relative md:inset-auto w-full max-w-6xl h-[100dvh] md:h-screen">
       <BorderAnimatedContainer>
-        {/* LEFT SIDE */}
-        <div className="w-80 bg-slate-800/50 backdrop-blur-sm flex flex-col">
+        {/* LEFT SIDE - on mobile it is hidden once a chat is open */}
+        <div
+          className={`${
+            selectedUser ? "hidden md:flex" : "flex"
+          } w-full md:w-80 bg-slate-800/50 backdrop-blur-sm flex-col`}
+        >
           <div className="flex items-center justify-between px-2">
-            <div className="flex-1">
+            <div className="flex-1 min-w-0">
               <ProfileHeader />
             </div>
-            <div className="relative mr-2">
+            <div className="md:relative mr-2">
               <button
-                className="p-2 rounded-full hover:bg-slate-700/50"
+                className="relative p-2 rounded-full hover:bg-slate-700/50"
                 onClick={() => setShowRequests((prev) => !prev)}
               >
                 <Bell size={18} className="text-slate-200" />
@@ -40,7 +44,7 @@ function ChatPage() {
               </button>
 
               {showRequests && (
-                <div className="absolute right-0 mt-2 w-72 bg-slate-800 border border-slate-700 rounded-lg shadow-lg z-50 max-h-96 overflow-y-auto">
+                <div className="fixed left-2 right-2 top-20 md:absolute md:left-auto md:right-0 md:top-auto md:mt-2 md:w-72 bg-slate-800 border border-slate-700 rounded-lg shadow-lg z-50 max-h-96 overflow-y-auto">
                   <RequestsInbox onClose={() => setShowRequests(false)} />
                 </div>
               )}
@@ -54,8 +58,12 @@ function ChatPage() {
           </div>
         </div>
 
-        {/* RIGHT SIDE */}
-        <div className="flex-1 flex flex-col bg-slate-900/50 backdrop-blur-sm">
+        {/* RIGHT SIDE - on mobile it is hidden until a chat is selected */}
+        <div
+          className={`${
+            selectedUser ? "flex" : "hidden md:flex"
+          } flex-1 min-w-0 flex-col bg-slate-900/50 backdrop-blur-sm`}
+        >
           {selectedUser ? <ChatContainer /> : <NoConversationPlaceholder />}
         </div>
       </BorderAnimatedContainer>

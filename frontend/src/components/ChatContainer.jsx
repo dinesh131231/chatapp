@@ -1,4 +1,3 @@
-
 import { useEffect, useRef, useMemo } from "react";
 import { useAuthStore } from "../store/useAuthStore";
 import { useChatStore } from "../store/useChatStore";
@@ -73,7 +72,7 @@ function ChatContainer() {
       <ChatHeader />
 
       {/* Offline mode toggle + status */}
-      <div className="flex items-center justify-between px-6 py-2 border-b border-slate-700/50">
+      <div className="flex items-center justify-between gap-2 px-3 md:px-6 py-2 border-b border-slate-700/50">
         <button
           className={`btn btn-xs ${p2pEnabled ? "btn-success" : "btn-outline"}`}
           onClick={handleToggleP2P}
@@ -82,7 +81,7 @@ function ChatContainer() {
           {p2pEnabled ? "Offline mode: ON" : "Enable offline mode"}
         </button>
         {p2pEnabled && (
-          <span className="text-xs text-slate-400">
+          <span className="text-xs text-slate-400 text-right">
             {p2pStatus === "connected"
               ? "🟢 Direct connection active"
               : p2pStatus === "connecting"
@@ -92,7 +91,7 @@ function ChatContainer() {
         )}
       </div>
 
-      <div className="flex-1 px-6 overflow-y-auto py-8">
+      <div className="flex-1 min-h-0 px-3 md:px-6 overflow-y-auto py-4 md:py-8">
         {isMessagesLoading ? (
           <MessagesLoadingSkeleton />
         ) : !canMessage ? (
@@ -107,7 +106,7 @@ function ChatContainer() {
                 className={`chat ${msg.isOwn ? "chat-end" : "chat-start"}`}
               >
                 <div
-                  className={`chat-bubble relative ${
+                  className={`chat-bubble relative max-w-[80%] md:max-w-md break-words ${
                     msg.isOwn ? "bg-cyan-600 text-white" : "bg-slate-800 text-slate-200"
                   } ${msg.isP2P ? "border border-emerald-400/50" : ""}`}
                 >

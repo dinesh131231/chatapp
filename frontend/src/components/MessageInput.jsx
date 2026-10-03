@@ -1,4 +1,3 @@
-
 import { useRef, useState } from "react";
 import useKeyboardSound from "../hooks/useKeyboardSound";
 import { useChatStore } from "../store/useChatStore";
@@ -45,6 +44,7 @@ function MessageInput({ useP2P = false, sendP2PMessage }) {
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];
+    if (!file) return;
     if (!file.type.startsWith("image/")) {
       toast.error("Please select an image file");
       return;
@@ -61,7 +61,7 @@ function MessageInput({ useP2P = false, sendP2PMessage }) {
   };
 
   return (
-    <div className="p-4 border-t border-slate-700/50">
+    <div className="p-2 md:p-4 border-t border-slate-700/50">
       {useP2P && (
         <div className="max-w-3xl mx-auto mb-2">
           <span className="text-xs text-emerald-400">📡 Sending directly — offline mode</span>
@@ -87,7 +87,7 @@ function MessageInput({ useP2P = false, sendP2PMessage }) {
         </div>
       )}
 
-      <form onSubmit={handleSendMessage} className="max-w-3xl mx-auto flex space-x-4">
+      <form onSubmit={handleSendMessage} className="max-w-3xl mx-auto flex space-x-2 md:space-x-4">
         <input
           type="text"
           value={text}
@@ -95,7 +95,7 @@ function MessageInput({ useP2P = false, sendP2PMessage }) {
             setText(e.target.value);
             isSoundEnabled && playRandomKeyStrokeSound();
           }}
-          className="flex-1 bg-slate-800/50 border border-slate-700/50 rounded-lg py-2 px-4"
+          className="flex-1 min-w-0 bg-slate-800/50 border border-slate-700/50 rounded-lg py-2 px-3 md:px-4 text-base"
           placeholder={useP2P ? "Type your message (offline mode)..." : "Type your message..."}
         />
 
@@ -112,7 +112,7 @@ function MessageInput({ useP2P = false, sendP2PMessage }) {
           type="button"
           onClick={() => fileInputRef.current?.click()}
           disabled={useP2P}
-          className={`bg-slate-800/50 text-slate-400 hover:text-slate-200 rounded-lg px-4 transition-colors disabled:opacity-40 disabled:cursor-not-allowed ${
+          className={`bg-slate-800/50 text-slate-400 hover:text-slate-200 rounded-lg px-3 md:px-4 transition-colors disabled:opacity-40 disabled:cursor-not-allowed ${
             imagePreview ? "text-cyan-500" : ""
           }`}
           title={useP2P ? "Images aren't available in offline mode" : ""}
@@ -122,7 +122,7 @@ function MessageInput({ useP2P = false, sendP2PMessage }) {
         <button
           type="submit"
           disabled={!text.trim() && !imagePreview}
-          className="bg-gradient-to-r from-cyan-500 to-cyan-600 text-white rounded-lg px-4 py-2 font-medium hover:from-cyan-600 hover:to-cyan-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+          className="bg-gradient-to-r from-cyan-500 to-cyan-600 text-white rounded-lg px-3 md:px-4 py-2 font-medium hover:from-cyan-600 hover:to-cyan-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
         >
           <SendIcon className="w-5 h-5" />
         </button>

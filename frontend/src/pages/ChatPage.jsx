@@ -18,7 +18,7 @@ function ChatPage() {
   const [showRequests, setShowRequests] = useState(false);
 
   return (
-    <div className="fixed inset-0 md:relative md:inset-auto w-full max-w-6xl h-[100dvh] md:h-screen">
+    <div className="fixed inset-0 md:relative md:inset-auto w-full max-w-6xl h-[100dvh] p-4 md:h-screen">
       <BorderAnimatedContainer>
         {/* LEFT SIDE - on mobile it is hidden once a chat is open */}
         <div

@@ -18,7 +18,7 @@ function ChatContainer() {
   } = useChatStore();
   const { authUser } = useAuthStore();
   const { p2pEnabled, p2pStatus, p2pMessages, enableP2P, disableP2P, sendP2PMessage } = useP2PStore();
-  const messageEndRef = useRef(null);
+  const messagesContainerRef = useRef(null);
 
   useEffect(() => {
     getMessagesByUserId(selectedUser._id);
@@ -52,8 +52,11 @@ function ChatContainer() {
   }, [messages, p2pMessages, authUser._id]);
 
   useEffect(() => {
-    if (messageEndRef.current) {
-      messageEndRef.current.scrollIntoView({ behavior: "smooth" });
+    if (messagesContainerRef.current) {
+      messagesContainerRef.current.scrollTo({
+        top: messagesContainerRef.current.scrollHeight,
+        behavior: "smooth",
+      });
     }
   }, [combinedMessages]);
 
@@ -91,7 +94,7 @@ function ChatContainer() {
         )}
       </div>
 
-      <div className="flex-1 min-h-0 px-3 md:px-6 overflow-y-auto py-4 md:py-8">
+      <div ref={messagesContainerRef} className="flex-1 min-h-0 px-3 md:px-6 overflow-y-auto py-4 md:py-8">
         {isMessagesLoading ? (
           <MessagesLoadingSkeleton />
         ) : !canMessage ? (
@@ -107,7 +110,7 @@ function ChatContainer() {
               >
                 <div
                   className={`chat-bubble relative max-w-[80%] md:max-w-md break-words ${
-                    msg.isOwn ? "bg-cyan-600 text-white" : "bg-slate-800 text-slate-200"
+                    msg.isOwn ? "bg-[#A78BFA] text-white" : "bg-slate-800 text-slate-200"
                   } ${msg.isP2P ? "border border-emerald-400/50" : ""}`}
                 >
                   {msg.image && (
@@ -124,7 +127,6 @@ function ChatContainer() {
                 </div>
               </div>
             ))}
-            <div ref={messageEndRef} />
           </div>
         ) : (
           <NoChatHistoryPlaceholder />

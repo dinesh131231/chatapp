@@ -3,6 +3,7 @@ import { useAuthStore } from "../store/useAuthStore";
 import BorderAnimatedContainer from "../components/BorderAnimatedContainer";
 import { MessageCircleIcon, MailIcon, Eye, EyeOff, LoaderIcon, LockIcon } from "lucide-react";
 import { Link } from "react-router";
+import loginimg from "../asstes/login.png"
 
 function LoginPage() {
   const [formData, setFormData] = useState({ email: "", password: "" });
@@ -94,7 +95,7 @@ function LoginPage() {
             <div className="hidden md:w-1/2 md:flex items-center justify-center p-6 bg-gradient-to-bl from-slate-800/20 to-transparent">
               <div>
                 <img
-                  src="/login.png"
+                  src={loginimg}
                   alt="People using mobile devices"
                   className="w-full h-auto object-contain"
                 />

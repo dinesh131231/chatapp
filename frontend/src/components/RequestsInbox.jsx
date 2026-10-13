@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import { useChatRequestStore } from "../store/useChatRequestStore";
+import avatar from "../asstes/avatar.png"
 
 const RequestsInbox = ({ onClose }) => {
   const { pendingRequests, getPendingRequests, respondToRequest } = useChatRequestStore();
@@ -19,7 +20,7 @@ const RequestsInbox = ({ onClose }) => {
       {pendingRequests.length === 0 && <p className="text-slate-400 text-sm">No pending requests</p>}
       {pendingRequests.map((req) => (
         <div key={req._id} className="flex items-center gap-2 p-2 hover:bg-slate-700/50 rounded">
-          <img src={req.senderId.profilePic || "/avatar.png"} alt="" className="w-8 h-8 rounded-full" />
+          <img src={req.senderId.profilePic || avatar} alt="" className="w-8 h-8 rounded-full" />
           <span className="flex-1 text-slate-200 text-sm">{req.senderId.fullName}</span>
           <button className="btn btn-xs btn-success" onClick={() => handleRespond(req._id, "accept")}>
             Accept

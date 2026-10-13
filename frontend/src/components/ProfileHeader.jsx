@@ -3,6 +3,7 @@ import { LogOutIcon, VolumeOffIcon, Volume2Icon } from "lucide-react";
 import { useAuthStore } from "../store/useAuthStore";
 import { useChatStore } from "../store/useChatStore";
 import ConfirmationModal from "./Confirmationmodal";
+import avatar from "../asstes/avatar.png"
 
 const mouseClickSound = new Audio("/sounds/mouse-click.mp3");
 
@@ -44,7 +45,7 @@ function ProfileHeader() {
               onClick={() => fileInputRef.current.click()}
             >
               <img
-                src={selectedImg || authUser.profilePic || "/avatar.png"}
+                src={selectedImg || authUser.profilePic || avatar}
                 alt="User image"
                 className="size-full object-cover"
               />
